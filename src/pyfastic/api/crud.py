@@ -1,4 +1,6 @@
+
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import selectinload
 from pyfastic.models import Image, Lora, ImageLoraLink
 from sqlmodel import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,6 +9,29 @@ async def get_all_images(db: AsyncSession):
     statement = select(Image)
     results = await db.execute(statement)
     return results.scalars().all()
+
+async def get_imageloralinks(db: AsyncSession):
+    statement = select(Image, ImageLoraLink, Lora).join(
+        ImageLoraLink, Image.id == ImageLoraLink.image_id
+    ).join(
+        Lora, ImageLoraLink.lora_id == Lora.id  
+    )
+
+    results = await db.execute(statement)
+    rows = results.all()
+        
+    output = []
+    for image, imageloralink, lora in rows:
+        # We bouwen een simpele dict. 
+        output.append({
+            "image_name": image.name,
+            "image_prompt": image.prompt,
+            "lora_name": lora.name,
+            "scale": imageloralink.scale, # De extra kolom
+            "image_id": image.id
+        })
+    return output
+
 
 async def get_image_by_id(db: AsyncSession, image_id: int):
     statement = select(Image).where(Image.id == image_id)

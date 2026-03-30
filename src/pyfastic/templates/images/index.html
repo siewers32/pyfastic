@@ -99,6 +99,18 @@
     <div id="result-container" class="mt-8"></div>
     <div id="loading-indicator" class="mt-8"></div>
 </div>
+<div>
+    {% for ll in imageloralinks %}
+        <div class="generated-image">
+            <h3>{{ ll.image_name }}</h3>
+            <p>{{ ll.image_prompt }}</p>
+            <p>{{ ll.lora_name  }}</p>
+            <p>{{ ll.scale }}</p>
+            <!-- <p>{% for lora in ll.lora_links %}{{ lora.id }},{{ lora.name }}, {% endfor %}</p> -->
+            <img src="{{ storage_url }}/{{ ll.image_id }}.png" alt="{{ ll.image_name }}" width="256px">
+        </div>
+    {% endfor %}
+</div>
 <script>
     function addLoraToModels(lora_id, lora_name, scale, trigger) {
         const f = document.querySelector('#generator-form');
@@ -106,6 +118,12 @@
         f.loras.value += lora_name + '\n';
         f.scales.value += scale + '\n';   
         f.prompt.value += ' ' + trigger;
+    }
+
+    function reusePrompt(prompt) {
+        const f = document.querySelector('#generator-form');
+        f.prompt.value = prompt;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 </script>
 {% endblock %}

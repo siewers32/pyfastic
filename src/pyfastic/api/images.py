@@ -7,6 +7,7 @@ from pyfastic.dependencies import templates
 from sqlalchemy.ext.asyncio import AsyncSession
 from pyfastic.database import get_db
 from pyfastic.api.crud import *
+from pyfastic.config import settings
 from celery.result import AsyncResult
 
 # Maak de router aan
@@ -35,17 +36,22 @@ def convert_str_to_list_ints(input_str: str) -> list:
 
 
 @router.get("/", response_class=HTMLResponse)
-async def list_images(request: Request, db: AsyncSession = Depends(get_db)):
+
+
+
+async def list_images(request: Request, db: AsyncSession = Depends(get_db), response_model=list[ImageLoraLink]):
     # Hergebruik de functies uit crud.py
-    images = await get_all_images(db)
+    imageloralinks = await get_imageloralinks(db)
+    # images = await get_all_images(db)
     loras = await get_all_loras(db)
-    
+    print(f"DEBUG: Retrieved {imageloralinks}")
     return templates.TemplateResponse(
         request=request,
         name="images/index.html",
         context={
-            "images": images,
-            "loras": loras
+            "imageloralinks": imageloralinks,
+            "loras": loras,
+            "storage_url": settings.STORAGE_URL
         }
     )
 

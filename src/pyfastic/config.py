@@ -65,6 +65,7 @@ class Settings(BaseSettings):
     # Storage
     STORAGE_TYPE: str = "local"  # of 's3', 'gcs', etc.
     STORAGE_DIR: str = str(BASE_DIR / "storage")
+    STORAGE_URL: str = "/storage"  # URL-pad voor toegang tot opgeslagen bestanden
 
     # Translation
     TRANSLATION_TOKEN: str = "huggingfaces_token_example"
