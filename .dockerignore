@@ -1,0 +1,23 @@
+# Negeer de lokale virtuele omgeving
+.venv/
+
+# Negeer Git data
+.git/
+.gitignore
+
+# Negeer Python cache
+__pycache__/
+*.pyc
+
+# Negeer build folders
+dist/
+build/
+
+# Negeer Docker bestanden zelf
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Negeer documentatie en tests (optioneel, bespaart ruimte in image)
+README.md
+tests/

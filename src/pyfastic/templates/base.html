@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PyFastic AI{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/css/style.css?v=4') }}">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">PyFastic</a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/images">Images</a></li>
+                <li><a href="/loras">Loras</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+
+</body>
+</html>

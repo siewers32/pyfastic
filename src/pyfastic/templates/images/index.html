@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}AI Generator - PyFastic{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>AI Image Generator</h1>
+    <p>Beschrijf de afbeelding die je wilt genereren via MLX.</p>
+
+ <form hx-post="/images/add" 
+        hx-target="#result-container" 
+        hx-indicator="#loading-indicator"
+        class="generator-form" 
+        id="generator-form">
+
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" name="name" id="name" placeholder="Naam van de afbeelding" required>
+        </div>
+
+        <!-- <div class="form-group">
+            <label for="translate">Prompt</label>
+            <textarea name="translate" id="translate" placeholder="Translate this text" required></textarea>
+        </div> -->
+
+        <div class="form-group">
+            <label for="prompt">Prompt</label>
+            <textarea name="prompt" id="prompt" placeholder="Bijv. Een futuristische stad in de bergen..." required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="loras">Model</label>
+            <textarea name="loras" id="loras"></textarea>
+            <input type="text" id="lora_ids" name="lora_ids">
+        </div>
+        
+        <div class="form-group">
+            <label for="scales">Scale</label>   
+            <textarea name="scales" id="scales"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="negative_prompt">Negative Prompt (Optioneel)</label>
+            <input type="text" name="negative_prompt" id="negative_prompt" value="blurry, bad quality, lowres, deformed">
+        </div>
+        <div class="form-group">
+            <div class="lora-list">
+            {% for lora in loras %}
+                <div class="lora-item"> 
+                    <button type="button" class="btn-secondary" onclick="addLoraToModels('{{ lora.id }}', '{{ lora.name }}', '{{ lora.scale }}', '{{ lora.trigger }}')">
+                        Add
+                    </button>                   
+                    <label style="display: block; padding:30px;" for="lora_{{ loop.index }}">{{ lora.name[0:20] }}</label>
+                    <p>{{ lora.scale }}</p>
+                    <p>{{ lora.trigger[0:25] }}</p>
+                    <br>
+                </div>
+        {% endfor %}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="width">Breedte</label>
+                <select name="width" id="width">
+                    <option value="256">256px</option>
+                    <option value="512" selected>512px</option>
+                    <option value="768">768px</option>
+                    <option value="1024">1024px</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="height">Hoogte</label>
+                <select name="height" id="height">
+                    <option value="256">256px</option>
+                    <option value="512" selected>512px</option>
+                    <option value="768">768px</option>
+                    <option value="1024">1024px</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="steps">Steps</label>
+                <input type="number" name="steps" id="steps" value="9" min="1" max="50">
+            </div>
+            <div class="form-group">
+                <label for="seed">Seed</label>
+                <input type="number" name="seed" id="seed" value="1">
+            </div>
+        </div>
+
+        <button type="submit" class="btn-primary">
+            <span id="button-text">Genereer Afbeelding</span>
+        </button>
+
+    </form>
+
+    <div id="result-container" class="mt-8"></div>
+    <div id="loading-indicator" class="mt-8"></div>
+</div>
+<script>
+    function addLoraToModels(lora_id, lora_name, scale, trigger) {
+        const f = document.querySelector('#generator-form');
+        f.lora_ids.value += lora_id + ',';
+        f.loras.value += lora_name + '\n';
+        f.scales.value += scale + '\n';   
+        f.prompt.value += ' ' + trigger;
+    }
+</script>
+{% endblock %}

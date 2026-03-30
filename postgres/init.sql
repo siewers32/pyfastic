@@ -1,0 +1,2 @@
+CREATE ROLE super_user WITH LOGIN PASSWORD 'super' SUPERUSER;
+CREATE DATABASE pyfastic OWNER super_user;

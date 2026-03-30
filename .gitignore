@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.env
+build/
+dist/
+*.egg-info/
+*.png
+
+# UV / Package Managers
+.uv/
+uv.lock
+
+# IDE's
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Loras - PyFastic{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>Lora Beheer</h1>
+    <p>Beheer je Lora modellen.</p>
+
+    <form action="/loras/add" method="post">
+
+        
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" name="name" id="name" placeholder="Lora Model Name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="scale">Scale</label>
+            <input type="number" name="scale" id="scale" placeholder="Lora Scale" min="0.0" step="0.1" max="1.0" required>
+        </div>
+
+        <div class="form-group">
+            <label for="trigger">Trigger</label>
+            <textarea name="trigger" id="trigger" placeholder="trigger 1, trigger 2" required></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary">
+            <span id="button-text">Voeg Lora Model Toe</span>
+        </button>
+    </form>
+
+    <div id="result-container" class="mt-8">
+    </div>
+    <div class="lora-container">
+    <h1>Beschikbare LoRAs 🤖</h1>
+    
+    <div class="lora-list">
+        {% for lora in loras %}
+            <div class="lora-item">
+                <form>
+                    <p>{{ lora.name[0:25] + "..." }}
+                    {{ lora.scale }}
+                    <p>{{ lora.trigger[0:25] }}</p>
+                </form>
+            </div>
+        {% else %}
+            <p>Er zijn nog geen LoRAs gevonden in de database.</p>
+        {% endfor %}
+    </div>
+</div>
+</div>
+
+{% endblock %}

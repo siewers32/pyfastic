@@ -1,0 +1,8 @@
+<div>
+    <ul>
+        <li><strong>Prompt:</strong> {{ image.prompt }}</li>
+        <li><strong>Naam:</strong> {{ image.name }}</li>
+        <li><strong>Afbeelding ID:</strong> {{ image.id }}</li>
+    </ul>
+    <img src="{{ url_for('storage', path='/' + image_name) }}" alt="{{ image.name }}" class="generated-image">
+</div>
