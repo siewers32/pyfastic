@@ -146,3 +146,4 @@ async def get_task_status(
                 "prompt": "De AI is nog bezig..." 
             }
         )
+    

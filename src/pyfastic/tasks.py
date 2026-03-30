@@ -1,8 +1,11 @@
 import asyncio
+
+from requests import session
 from pyfastic.celery_app import celery_app
 from pyfastic.database import async_session_maker 
 from pyfastic.models import Image, ImageLoraLink
 from pyfastic.config import settings
+from pyfastic.services.translation_service import translator
 from pyfastic.services.image_gererator import image_service
 from sqlmodel import select
 from sqlalchemy.orm import selectinload
@@ -51,3 +54,24 @@ async def _async_task_logic(image_id: int):
         
     # We kunnen db_image.status veilig teruggeven omdat het object niet 'expired' is
     return {"id": image_id, "status": db_image.status}
+
+
+@celery_app.task(name="generate_translation", bind=True)
+def generate_translation_task(self, text_id: int):
+    # Gebruik run_until_complete voor de async logica binnen Celery
+    return asyncio.get_event_loop().run_until_complete(
+        _async_translate_logic(text_id)
+    )
+
+async def _async_translate_logic(prompt: str):
+    try:
+        final_output = await asyncio.to_thread(translator.translate_prompt, prompt)
+
+    except Exception as e:
+        print(f"Error tijdens translator generatie: {e}")
+        # Eventueel: raise self.retry(exc=e) als je Celery retries wilt gebruiken
+    return { 
+        "status": "Translation completed",
+        "translation": final_output
+    }
+ 

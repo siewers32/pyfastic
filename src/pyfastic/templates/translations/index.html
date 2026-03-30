@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Translator - PyFastic{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h1>AI Translator</h1>
+    <p>Beschrijf de tekst die je wilt vertalen via MLX.</p>
+
+ <form hx-post="/translations/translate" 
+        hx-target="#result-container" 
+        hx-indicator="#loading-indicator"
+        class="generator-form" 
+        id="generator-form">
+
+
+        <div class="form-group">
+            <label for="prompt">Prompt</label>
+            <textarea name="prompt" id="prompt" placeholder="Bijv. Een futuristische stad in de bergen..." required></textarea>
+        </div>
+        
+        <button type="submit" class="btn-primary">
+            <span id="button-text">Vertaal Tekst (NL->EN)</span>
+        </button>
+
+    </form>
+
+    <div id="result-container" class="mt-8"></div>
+    <div id="loading-indicator" class="mt-8"></div>
+</div>
+{% endblock %}

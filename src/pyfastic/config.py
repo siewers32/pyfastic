@@ -1,4 +1,5 @@
 from typing import Annotated, Any, Union
+from mflux import models
 from pydantic import (
     PostgresDsn,
     BeforeValidator,
@@ -64,6 +65,10 @@ class Settings(BaseSettings):
     # Storage
     STORAGE_TYPE: str = "local"  # of 's3', 'gcs', etc.
     STORAGE_DIR: str = str(BASE_DIR / "storage")
+
+    # Translation
+    TRANSLATION_TOKEN: str = "huggingfaces_token_example"
+    TRANSLATION_MODEL: str = "stelterlab/EuroLLM-9B-Instruct-MLX-4bit"
 
     @computed_field
     @property

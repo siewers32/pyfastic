@@ -1,0 +1,8 @@
+<div class="status-container" 
+     hx-get="/translations/status/{{ task_id }}" 
+     hx-trigger="load delay:2s" 
+     hx-swap="outerHTML">
+    <div class="loader"></div>
+    <p>AI is aan het denken over: <strong>{{ prompt }}</strong>...</p>
+    <small>ID: {{ task_id }}</small>
+</div>
