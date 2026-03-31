@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from pyfastic.tasks import generate_ai_image_task
 from pyfastic.dependencies import templates
 from sqlalchemy.ext.asyncio import AsyncSession
-from pyfastic.database import get_db
+from pyfastic.database import async_session_maker, get_db
 from pyfastic.api.crud import *
 from pyfastic.config import settings
 from celery.result import AsyncResult
@@ -16,11 +16,10 @@ router = APIRouter(
     tags=["images"]
 )
 
-
 def convert_str_to_list_floats(input_str: str) -> list:
     # Verwijder spaties en splits op komma
     try:
-        return [float(item.strip()) for item in input_str.split("\n") if item.strip()]
+        return [float(item.strip()) for item in input_str.split(",") if item.strip()]
     except Exception as e:
         print(f"Error converting string to list: {e}")
         return []
@@ -33,24 +32,36 @@ def convert_str_to_list_ints(input_str: str) -> list:
         print(f"Error converting string to list: {e}")
         return []
 
-
-
 @router.get("/", response_class=HTMLResponse)
+async def list_images(request: Request, response_class=HTMLResponse):
+    try:
+        async with async_session_maker() as session:
+            statement = (
+                select(Image)
+                .options(
+                    selectinload(Image.lora_links).selectinload(ImageLoraLink.lora)
+                )
+            )
+            
+            result = await session.execute(statement)
+            # Gebruik unique() bij joins/relationships om dubbele hoofd-objecten te voorkomen
+            images = result.scalars().unique().all()
+            
+    except Exception as e:
+        print("Database connection failed:", e)
+    
+    try:
+        loras = await get_all_loras(session)
+    except Exception as e:
+        print("Failed to fetch LoRAs:", e)
+        loras = []
 
-
-
-async def list_images(request: Request, db: AsyncSession = Depends(get_db), response_model=list[ImageLoraLink]):
-    # Hergebruik de functies uit crud.py
-    imageloralinks = await get_imageloralinks(db)
-    # images = await get_all_images(db)
-    loras = await get_all_loras(db)
-    print(f"DEBUG: Retrieved {imageloralinks}")
     return templates.TemplateResponse(
         request=request,
         name="images/index.html",
         context={
-            "imageloralinks": imageloralinks,
             "loras": loras,
+            "images": images,
             "storage_url": settings.STORAGE_URL
         }
     )

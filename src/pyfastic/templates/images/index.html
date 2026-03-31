@@ -36,7 +36,7 @@
         
         <div class="form-group">
             <label for="scales">Scale</label>   
-            <textarea name="scales" id="scales"></textarea>
+            <input type="text" name="scales" id="scales">
         </div>
 
         <div class="form-group">
@@ -100,30 +100,44 @@
     <div id="loading-indicator" class="mt-8"></div>
 </div>
 <div>
-    {% for ll in imageloralinks %}
+    {% for img in images %}
         <div class="generated-image">
-            <h3>{{ ll.image_name }}</h3>
-            <p>{{ ll.image_prompt }}</p>
-            <p>{{ ll.lora_name  }}</p>
-            <p>{{ ll.scale }}</p>
-            <!-- <p>{% for lora in ll.lora_links %}{{ lora.id }},{{ lora.name }}, {% endfor %}</p> -->
-            <img src="{{ storage_url }}/{{ ll.image_id }}.png" alt="{{ ll.image_name }}" width="256px">
+            <img src="{{ storage_url }}/{{ img.id }}.png" alt="{{ img.name }}" width="256px">
+            <form method="post" id="reuse-prompt-form-{{ img.id }}" action="/images/reuse_prompt">
+                <input type="hidden" name="name" value="{{ img.name }}">
+                <input type="hidden" name="prompt" value="{{ img.prompt }}">
+                <input type="hidden" name="loras" value="{% for link in img.lora_links %}{{ link.lora.name }},{% endfor %}">
+                <input type="hidden" name="loras_ids" value="{% for link in img.lora_links %}{{ link.lora.id }},{% endfor %}">
+                <input type="hidden" name="scales" value="{% for link in img.lora_links %}{{ link.scale }},{% endfor %}">
+                <button type="button" class="btn-primary" onclick="reusePrompt(document.getElementById('reuse-prompt-form-{{ img.id }}'))">Reuse Prompt</button>
+            </form>
         </div>
     {% endfor %}
 </div>
 <script>
+    function reusePrompt(f) {
+        const name = f.name.value;
+        const prompt = f.prompt.value;
+        const loras = f.loras.value;
+        const lora_ids = f.loras_ids.value;
+        const scales = f.scales.value;
+
+        const gf = document.querySelector('#generator-form');
+        gf.prompt.value = prompt;
+        gf.name.value = name;
+        gf.loras.value = loras;
+        gf.scales.value = scales;
+        gf.lora_ids.value = lora_ids;
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     function addLoraToModels(lora_id, lora_name, scale, trigger) {
         const f = document.querySelector('#generator-form');
         f.lora_ids.value += lora_id + ',';
-        f.loras.value += lora_name + '\n';
-        f.scales.value += scale + '\n';   
+        f.loras.value += lora_name + ',';
+        f.scales.value += scale + ',';
         f.prompt.value += ' ' + trigger;
-    }
-
-    function reusePrompt(prompt) {
-        const f = document.querySelector('#generator-form');
-        f.prompt.value = prompt;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 </script>
 {% endblock %}
