@@ -20,19 +20,17 @@ app.mount("/static", StaticFiles(directory=settings.STATIC_DIR), name="static")
 app.mount("/storage", StaticFiles(directory=settings.STORAGE_DIR), name="storage")
 
 
-@app.get("/")
-def read_root(request: Request):
-# Hier maken we de variabele aan
-    hello_text = "Hello World"
+@app.get("/", response_class=HTMLResponse)
+async def root_read(request: Request):
     
-    # We sturen de 'request' altijd mee, plus onze eigen variabelen
     return templates.TemplateResponse(
-        "home/index.html", 
-        {"request": request, "hello": hello_text}
+        request=request,
+        name="home/index.html",
+        context={"request": request, "message": "Welkom op de homepage van je AI applicatie."}
     )
 
 @app.get("/secrets")
-def read_secrets():
+async def read_secrets():
     value = generate_keys_json()
     return {"message": "Secrets generated!", "keys": value}
 

@@ -56,7 +56,7 @@ async def list_images(request: Request, db: AsyncSession = Depends(get_db), resp
     )
 
     
-@router.post("/add")
+@router.post("/add", response_class=HTMLResponse)
 async def add_image(
     request: Request,
     db: AsyncSession = Depends(get_db),
@@ -93,12 +93,14 @@ async def add_image(
 
     task = generate_ai_image_task.delay(
         new_image.id, 
-    ) 
+    )
+
     return templates.TemplateResponse(
-        "images/_status_check.html", 
-        {
+        request=request,
+        name="images/_status_check.html",
+        context={
             "request": request, 
-            "task_id": task.id, # Gebruik task.id van de zojuist gestarte taak
+            "task_id": task.id, 
             "prompt": "Generatie gestart..."
         }
     )
@@ -129,8 +131,9 @@ async def get_task_status(
 
         # Return het 'klaar' fragment (de afbeelding zelf)
         return templates.TemplateResponse(
-            "images/_image_card.html", 
-            {
+            request=request,
+            name="images/_image_card.html",
+            context={
                 "request": request, 
                 "image": db_image,
                 "image_name": image_name
@@ -145,8 +148,9 @@ async def get_task_status(
         # Status is PENDING of STARTED: we laten de loader staan.
         # Door dit fragment terug te sturen met dezelfde hx-get, blijft HTMX pollen.
         return templates.TemplateResponse(
-            "images/_status_check.html", 
-            {
+            request=request,
+            name="images/_status_check.html",
+            context={
                 "request": request, 
                 "task_id": task_id, 
                 "prompt": "De AI is nog bezig..." 

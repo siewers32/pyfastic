@@ -32,13 +32,15 @@ async def do_translation(
     task = generate_translation_task.delay(prompt)
     print(f"Translation task ID: {task.id}")
     return templates.TemplateResponse(
-        "translations/_status_check.html", 
-        {
-            "request": request, 
-            "task_id": task.id, # Gebruik task.id van de zojuist gestarte taak
+        request=request,
+        name="translations/_status_check.html",
+        context={
+            "request": request,
+            "task_id": task.id,
             "prompt": "Generatie gestart..."
         }
     )
+
 
 @router.get("/status/{task_id}", response_class=HTMLResponse)
 async def get_task_status(
@@ -58,13 +60,15 @@ async def get_task_status(
             
         # Return het 'klaar' fragment (de afbeelding zelf)
         return templates.TemplateResponse(
-            "translations/_translation_result.html", 
-            {
-                "request": request, 
+            request=request,
+            name="translations/_translation_result.html",
+            context={
+                "request": request,
                 "translation": translation,
-                "status": status,
+                "status": status
             }
         )
+
 
     elif result.state == "FAILURE":
         # Er ging iets mis in de worker (bijv. MLX crash)
@@ -74,8 +78,9 @@ async def get_task_status(
         # Status is PENDING of STARTED: we laten de loader staan.
         # Door dit fragment terug te sturen met dezelfde hx-get, blijft HTMX pollen.
         return templates.TemplateResponse(
-            "translations/_status_check.html", 
-            {
+            request=request,
+            name="translations/_status_check.html",
+            context={
                 "request": request, 
                 "task_id": task_id, 
                 "prompt": "De AI is nog bezig..." 
