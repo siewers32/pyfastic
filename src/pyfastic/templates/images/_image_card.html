@@ -4,5 +4,5 @@
         <li><strong>Naam:</strong> {{ image.name }}</li>
         <li><strong>Afbeelding ID:</strong> {{ image.id }}</li>
     </ul>
-    <img src="{{ url_for('storage', path='/' + image_name) }}" alt="{{ image.name }}" class="generated-image">
+    <img src="{{ url_for('storage', path='/' + image.image_url) }}" alt="{{ image.name }}" class="generated-image">
 </div>

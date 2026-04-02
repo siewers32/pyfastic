@@ -8,13 +8,25 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pyfastic.database import async_session_maker, get_db
 from pyfastic.api.crud import *
 from pyfastic.config import settings
+from pyfastic.utilities.app_secrets import generate_unique_name
 from celery.result import AsyncResult
+from datetime import datetime
+import os
+
 
 # Maak de router aan
 router = APIRouter(
     prefix="/images",
     tags=["images"]
 )
+
+def generate_image_path() -> str:
+    now = datetime.now()
+    year = now.strftime("%Y")
+    month = now.strftime("%m")
+    if not os.path.exists(f"{settings.STORAGE_DIR}/{year}/{month}"):
+        os.makedirs(f"{settings.STORAGE_DIR}/{year}/{month}")
+    return f"{year}/{month}/{generate_unique_name()}.png"
 
 def convert_str_to_list_floats(input_str: str) -> list:
     # Verwijder spaties en splits op komma
@@ -89,7 +101,8 @@ async def add_image(
         steps=steps, 
         seed=seed, 
         width=width, 
-        height=height
+        height=height,
+        image_url=generate_image_path()
     )
   
     lora_ids = convert_str_to_list_ints(lora_ids)
@@ -135,7 +148,6 @@ async def get_task_status(
             
         # Haal de afbeelding op uit de DB om de URL/data te krijgen
         db_image = await db.get(Image, db_id)
-        image_name = f"{db_image.id}.png"
         
         if not db_image:
             return "<p class='error'>Afbeelding niet gevonden in database.</p>"
@@ -147,7 +159,6 @@ async def get_task_status(
             context={
                 "request": request, 
                 "image": db_image,
-                "image_name": image_name
             }
         )
 

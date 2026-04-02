@@ -80,7 +80,8 @@ async def create_image(
           steps: int = 9, 
           width: int = 512, 
           height: int = 512, 
-          seed: int = 1
+          seed: int = 1,
+          image_url: str = ""
         ):
     try:
         new_image = Image(
@@ -90,7 +91,8 @@ async def create_image(
             steps=steps,
             width=width,
             height=height,
-            seed=seed
+            seed=seed,
+            image_url=image_url
         )
         db.add(new_image)
         await db.commit()

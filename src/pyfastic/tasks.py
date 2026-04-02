@@ -1,5 +1,6 @@
 import asyncio
-
+from datetime import datetime
+import os
 from requests import session
 from pyfastic.celery_app import celery_app
 from pyfastic.database import async_session_maker 
@@ -9,6 +10,15 @@ from pyfastic.services.translation_service import translator
 from pyfastic.services.image_gererator import image_service
 from sqlmodel import select
 from sqlalchemy.orm import selectinload
+
+
+# def create_image_name(image_id: int, created_at: datetime) -> str:
+#     month = created_at.strftime("%m")
+#     year = created_at.strftime("%Y")
+#     if not os.path.exists(f"{settings.STORAGE_DIR}/{year}/{month}"):
+#         os.makedirs(f"{settings.STORAGE_DIR}/{year}/{month}")
+#     return f"{settings.STORAGE_DIR}/{year}/{month}/{image_id}.png"
+
 
 @celery_app.task(name="generate_ai_image", bind=True)
 def generate_ai_image_task(self, image_id: int):
@@ -38,10 +48,9 @@ async def _async_task_logic(image_id: int):
             
     try:
         await asyncio.to_thread(image_service.generate_image, db_image)
-
+        
         # Simulatie van succesvolle afronding
         db_image.status = "completed"
-        db_image.image_url = f"{settings.STORAGE_DIR}/{db_image.id}.png"
         
     except Exception as e:
         db_image.status = "failed"

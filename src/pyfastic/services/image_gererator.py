@@ -5,16 +5,14 @@ from pathlib import Path
 from PIL import Image as PILImage # Voor thumbnails
 from pyfastic.config import settings
 from pyfastic.models import Image
+from datetime import datetime
+import os
 
 class ImageService:
     def __init__(self):
         self.storage_path = Path(settings.STORAGE_DIR)
         self.storage_path.mkdir(parents=True, exist_ok=True)
-
-    def generate_image_path(self, id: int) -> str:
-        return f"{self.storage_path}/{id}.png"
          
-
     def generate_image(self, img: Image) -> None:
         model = self.get_model(img)
         image = model.generate_image(
@@ -26,9 +24,9 @@ class ImageService:
             image_strength=None,
             scheduler=None,
             prompt=img.prompt,
-            negative_prompt=img.negative_prompt
+            negative_prompt=img.negative_prompt,
         )
-        image.save(self.generate_image_path(img.id))
+        image.save(f"{self.storage_path}/{img.image_url}")
 
     def get_model(self, img: Image) :
         from mflux.models.common.config import ModelConfig

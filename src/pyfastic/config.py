@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     
     # AI Model Configuratie
     AI_MODEL: str = "filipstrand/Z-Image-Turbo-mflux-4bit"
-    LORA_PATH: str = "/Users/janjaap/git/pyfastic_loras"
+    LORA_PATH: str = "/Volumes/FloepieJoepie/ai/civitai"
     LORA_PATHS: list[str] = []
     LORA_SCALES: list[float] = []
 

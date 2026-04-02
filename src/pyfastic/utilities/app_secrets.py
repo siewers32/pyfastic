@@ -17,6 +17,11 @@ def generate_keys_json():
     
     return json_output
 
+def generate_unique_name(length=12):
+    """Genereer een unieke naam van een bepaalde lengte."""
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
+
 if __name__ == "__main__":
     resultaat = generate_keys_json()
     print(resultaat)
