@@ -48,6 +48,7 @@ async def _async_task_logic(image_id: int):
             
     try:
         await asyncio.to_thread(image_service.generate_image, db_image)
+        await asyncio.to_thread(image_service.create_thumbnail, f"{settings.STORAGE_DIR}/{db_image.image_url}") 
         
         # Simulatie van succesvolle afronding
         db_image.status = "completed"

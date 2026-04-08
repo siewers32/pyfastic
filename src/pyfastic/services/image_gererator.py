@@ -41,8 +41,12 @@ class ImageService:
     
     def create_thumbnail(self, original_path: str):
         """Logica voor het maken van een kleine versie."""
-        # Gebruik Pillow om te resizen
-        pass
+        # Gebruik Pillow om te resizen  en sla op als thumbnail
+        thumbnail_path = original_path.replace(".png", "_thumb.png")
+        with PILImage.open(original_path) as img:
+            img.thumbnail((200, 200))  # Pas aan naar gewenste thumbnail grootte
+            img.save(thumbnail_path)
+        
 
 # Instantieer de service zodat je hem elders kunt importeren
 image_service = ImageService()  # Je zou hier een Image object kunnen injecteren als dat nodig is

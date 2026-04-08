@@ -28,6 +28,11 @@ def generate_image_path() -> str:
         os.makedirs(f"{settings.STORAGE_DIR}/{year}/{month}")
     return f"{year}/{month}/{generate_unique_name()}.png"
 
+def create_thumbnail_path(image_url: str) -> str:
+    if not image_url:
+        return None
+    return image_url.replace(".png", "_thumb.png")
+
 def convert_str_to_list_floats(input_str: str) -> list:
     # Verwijder spaties en splits op komma
     try:
@@ -58,7 +63,6 @@ async def list_images(request: Request, response_class=HTMLResponse):
             result = await session.execute(statement)
             # Gebruik unique() bij joins/relationships om dubbele hoofd-objecten te voorkomen
             images = result.scalars().unique().all()
-            
     except Exception as e:
         print("Database connection failed:", e)
     
@@ -68,12 +72,15 @@ async def list_images(request: Request, response_class=HTMLResponse):
         print("Failed to fetch LoRAs:", e)
         loras = []
 
+    # await session.close()
+
     return templates.TemplateResponse(
         request=request,
         name="images/index.html",
         context={
             "loras": loras,
             "images": images,
+            "thumbnail_urls": {image.id: create_thumbnail_path(image.image_url) for image in images},
             "storage_url": settings.STORAGE_URL
         }
     )
@@ -129,6 +136,40 @@ async def add_image(
         }
     )
 
+@router.post("/delete/{image_id}")
+async def delete_image_route(
+    image_id: int,
+    db: AsyncSession = Depends(get_db),
+    request: Request = None
+):
+    # 1. Haal de image data op uit de database
+    image = await db.get(Image, image_id)
+    
+    if not image:
+        return RedirectResponse(url="/images", status_code=status.HTTP_303_SEE_OTHER)
+
+    # 2. Verwijder de fysieke bestanden (image + thumbnail)
+    # We gebruiken settings.STORAGE_DIR om het volledige pad te bepalen
+    full_image_path = os.path.join(settings.STORAGE_DIR, image.image_url)
+    thumb_path = create_thumbnail_path(full_image_path)
+
+    try:
+        if os.path.exists(full_image_path):
+            os.remove(full_image_path)
+        if thumb_path and os.path.exists(thumb_path):
+            os.remove(thumb_path)
+    except Exception as e:
+        print(f"Error bij verwijderen bestand: {e}")
+        # We gaan door met de DB verwijdering, zelfs als het bestand al weg was
+
+    # 3. Verwijder uit de database
+    # De links (ImageLoraLink) worden meestal automatisch verwijderd als je 
+    # cascade="all, delete-orphan" in je SQLAlchemy model hebt staan.
+    await db.delete(image)
+    await db.commit()
+
+    # 4. Redirect terug naar het overzicht
+    return RedirectResponse(url="/images", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.get("/status/{task_id}", response_class=HTMLResponse)
 async def get_task_status(
@@ -152,6 +193,8 @@ async def get_task_status(
         if not db_image:
             return "<p class='error'>Afbeelding niet gevonden in database.</p>"
 
+        image_thumbnail_url = create_thumbnail_path(db_image.image_url)
+
         # Return het 'klaar' fragment (de afbeelding zelf)
         return templates.TemplateResponse(
             request=request,
@@ -159,6 +202,7 @@ async def get_task_status(
             context={
                 "request": request, 
                 "image": db_image,
+                "thumbnail_url": image_thumbnail_url
             }
         )
 

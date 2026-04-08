@@ -7,56 +7,51 @@
     <h1>AI Image Generator</h1>
     <p>Beschrijf de afbeelding die je wilt genereren via MLX.</p>
 
- <form hx-post="/images/add" 
+    <form hx-post="/images/add" 
         hx-target="#result-container" 
         hx-indicator="#loading-indicator"
         class="generator-form" 
         id="generator-form">
-
+    
         <div class="form-group">
             <label for="name">Name</label>
             <input type="text" name="name" id="name" placeholder="Naam van de afbeelding" required>
         </div>
 
-        <!-- <div class="form-group">
-            <label for="translate">Prompt</label>
-            <textarea name="translate" id="translate" placeholder="Translate this text" required></textarea>
-        </div> -->
-
         <div class="form-group">
             <label for="prompt">Prompt</label>
             <textarea name="prompt" id="prompt" placeholder="Bijv. Een futuristische stad in de bergen..." required></textarea>
         </div>
-
-        <div class="form-group">
-            <label for="loras">Model</label>
-            <textarea name="loras" id="loras"></textarea>
-            <input type="text" id="lora_ids" name="lora_ids">
-        </div>
-        
-        <div class="form-group">
-            <label for="scales">Scale</label>   
-            <input type="text" name="scales" id="scales">
-        </div>
-
-        <div class="form-group">
-            <label for="negative_prompt">Negative Prompt (Optioneel)</label>
-            <input type="text" name="negative_prompt" id="negative_prompt" value="blurry, bad quality, lowres, deformed">
-        </div>
-        <div class="form-group">
-            <div class="lora-list">
-            {% for lora in loras %}
-                <div class="lora-item"> 
-                    <button type="button" class="btn-secondary" onclick="addLoraToModels('{{ lora.id }}', '{{ lora.name }}', '{{ lora.scale }}', '{{ lora.trigger }}')">
-                        Add
-                    </button>                   
-                    <label style="display: block; padding:30px;" for="lora_{{ loop.index }}">{{ lora.name[0:20] }}</label>
-                    <p>{{ lora.scale }}</p>
-                    <p>{{ lora.trigger[0:25] }}</p>
-                    <br>
-                </div>
-        {% endfor %}
+        <div class="form-row">
+            <div class="form-group">
+                <label for="loras">Model</label>
+                <textarea name="loras" id="loras"></textarea>
+                <input type="text" id="lora_ids" name="lora_ids">
             </div>
+            <div class="form-group">
+                <label for="scales">Scale</label>   
+                <input type="text" name="scales" id="scales">
+            </div>        
+
+            <div class="form-group">
+                <label for="negative_prompt">Negative Prompt (Optioneel)</label>
+                <textarea name="negative_prompt" id="negative_prompt">"blurry, bad quality, lowres, deformed"</textarea>
+            </div>
+        </div>
+    
+        <div class="lora-list">
+        {% for lora in loras %}
+            <div class="lora-item">
+                <div class="lora-item-name">                  
+                    <label for="lora_{{ loop.index }}">{{ lora.name[0:10] }}</label>
+                    <button type="button" class="lora-item-button" onclick="addLoraToModels('{{ lora.id }}', '{{ lora.name }}', '{{ lora.scale }}', '{{ lora.trigger }}')">Add</button>  
+                </div>
+                <div class="lora-item-triggers">
+                    <span>Scale: {{ lora.scale }}</span>
+                    <span>Trigger: {{ lora.trigger[0:10] }}</span>
+                </div>
+            </div>
+        {% endfor %}
         </div>
         <div class="form-row">
             <div class="form-group">
@@ -77,9 +72,6 @@
                     <option value="1024">1024px</option>
                 </select>
             </div>
-        </div>
-
-        <div class="form-row">
             <div class="form-group">
                 <label for="steps">Steps</label>
                 <input type="number" name="steps" id="steps" value="9" min="1" max="50">
@@ -89,28 +81,32 @@
                 <input type="number" name="seed" id="seed" value="1">
             </div>
         </div>
-
         <button type="submit" class="btn-primary">
             <span id="button-text">Genereer Afbeelding</span>
         </button>
 
     </form>
-
-    <div id="result-container" class="mt-8"></div>
-    <div id="loading-indicator" class="mt-8"></div>
+    <div id="result-container"></div>
+    <div id="loading-indicator"></div>
 </div>
-<div>
+<div class="generated-images-container">
     {% for img in images %}
         <div class="generated-image">
-            <img src="{{ storage_url }}/{{ img.id }}.png" alt="{{ img.name }}" width="256px">
-            <form method="post" id="reuse-prompt-form-{{ img.id }}" action="/images/reuse_prompt">
-                <input type="hidden" name="name" value="{{ img.name }}">
-                <input type="hidden" name="prompt" value="{{ img.prompt }}">
-                <input type="hidden" name="loras" value="{% for link in img.lora_links %}{{ link.lora.name }},{% endfor %}">
-                <input type="hidden" name="loras_ids" value="{% for link in img.lora_links %}{{ link.lora.id }},{% endfor %}">
-                <input type="hidden" name="scales" value="{% for link in img.lora_links %}{{ link.scale }},{% endfor %}">
-                <button type="button" class="btn-primary" onclick="reusePrompt(document.getElementById('reuse-prompt-form-{{ img.id }}'))">Reuse Prompt</button>
-            </form>
+            <img src="{{ storage_url }}/{{ thumbnail_urls.get(img.id) }}" alt="{{ img.name }}" width="256px" onclick="window.open('{{ storage_url }}/{{ img.image_url }}', '_blank' )">
+            <div class="generated-image-buttons">
+                <form method="post" id="reuse-prompt-form-{{ img.id }}" action="/images/reuse_prompt">
+                    <input type="hidden" name="name" value="{{ img.name }}">
+                    <input type="hidden" name="prompt" value="{{ img.prompt }}">
+                    <input type="hidden" name="loras" value="{% for link in img.lora_links %}{{ link.lora.name }},{% endfor %}">
+                    <input type="hidden" name="loras_ids" value="{% for link in img.lora_links %}{{ link.lora.id }},{% endfor %}">
+                    <input type="hidden" name="scales" value="{% for link in img.lora_links %}{{ link.scale }},{% endfor %}">
+                    <button type="button" class="btn-primary" onclick="reusePrompt(document.getElementById('reuse-prompt-form-{{ img.id }}'))">Reuse Prompt</button>
+                </form>
+                <form method="post" action="/images/delete/{{ img.id }}" onsubmit="return confirm('Weet je zeker dat je deze afbeelding wilt verwijderen?');">
+                    <button type="submit" class="btn-primary">Delete</button>
+                </form>
+            </div>
+
         </div>
     {% endfor %}
 </div>

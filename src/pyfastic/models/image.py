@@ -26,6 +26,9 @@ class Image(ImageBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     # loras: List["Lora"] = Relationship(back_populates="images", link_model=ImageLoraLink)
     lora_links: List[ImageLoraLink] = Relationship(
+        sa_relationship_kwargs={
+            "cascade": "all, delete-orphan", # <--- Voor SQLAlchemy logica
+        },
         back_populates="image",
     )
     created_at: datetime = Field(

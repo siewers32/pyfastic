@@ -28,7 +28,6 @@ p {
 }
 
 .btn-primary {
-    margin-top: 1.5rem;
     background-color: #6366f1;
     color: white;
     border: none;
@@ -108,8 +107,8 @@ p {
 }
 
 .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-wrap: wrap;
     gap: 1rem;
 }
 
@@ -131,13 +130,15 @@ textarea {
     min-height: 80px;
 }
 
-.mt-8 {
+#result-container, #loading-indicator {
     margin-top: 2rem;
 }
 
 .lora-item {
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
+    flex-shrink: 0;
     justify-content: flex-start;
     margin-right: 2rem;
     margin-bottom: 1rem;
@@ -145,9 +146,63 @@ textarea {
     padding: 1rem;
     background-color: #eeeeee;
     text-align:left;
+    font-size: 0.8rem;
+}
+
+.lora-item-button {
+    background-color: #6366f1;
+    color: white;
+    border: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.lora-item-name {
+    display: flex;
+    justify-content: space-between;
+}
+
+.lora-item-triggers {
+    display: flex;
+    flex-direction: column;
 }
 
 .lora-list {
     display: flex;
     flex-wrap: wrap;
 }
+
+.generated-image {
+    background-color: rgb(246, 246, 246);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    max-width: 256px;
+    padding: 0.5rem;
+}
+
+.generated-images-container {
+    background-color: rgb(255, 255, 255);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.generated-image-buttons {
+    justify-content: space-between;
+    display: flex;
+}
+
+.full-generated-image {
+    display: flex;
+    flex-direction: row;
+    background-color: rgb(246, 246, 246);
+    max-width: 100%;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-top: 1rem;
+}
+
